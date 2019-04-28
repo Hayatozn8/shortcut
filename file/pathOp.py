@@ -1,27 +1,30 @@
 import os, re
 from functools import wraps
-# from shortcut.sysop import SYS_NAME, PATH_SEQ
-SYS_NAME = None #TODO
-PATH_SEQ = '/' #TODO
-# __all__ = [
-#     'cwd',
-#     'isFile',
-#     'isAbs',
-#     'isExists',
-#     'isType',
-#     'get_file_fullname',
-#     'get_file_name',
-#     'get_extension',
-#     'getDir',
-#     'getAbs',
-#     'getPySpace',
-#     'path_join'
-#     'cut_ectension',
-#     'get_files_fullname_from_dir',
-#     'path_normal',
-#     'walkdir_search_file',
-#     'walkdir_get_file_path'
-# ]
+from sysop import PATH_SEQ, SYS_NAME
+ 
+
+__all__ = [
+    'path_seq_normalizer',
+    'path_normal',
+    'cwd',
+    'isFile',
+    'isAbs',
+    'isDir',
+    'isExists',
+    'isType',
+    'pJoin',
+    'cutExtension',
+    'Extension',
+    'Dir',
+    'Abs',
+    'PySpace',
+    'Basename',
+    'DirAndBasename',
+    'Simplename',
+    'NameAndExtension',
+    'BasenamesFromDir',
+    'searchFile',
+]
 
 path_seq_normalizer = None
 if SYS_NAME == 'Windows':
@@ -304,7 +307,7 @@ def pJoin(main_path, *others):
         return path_seq_normalizer(os.path.join(main_path, *others))
 
 @path_normal
-def cut_extension(path):
+def cutExtension(path):
     """
     将路径中的文件扩展名删除
 
@@ -316,33 +319,33 @@ def cut_extension(path):
     #######使用绝对路径#######
     #1
     pathA = 'C:/Users/user/Desktop/xxx.txt'
-    result = cut_extension(pathA)
+    result = cutExtension(pathA)
     #result = 'C:/Users/user/Desktop/xxx'
 
     #2
     pathA = 'C:/Users/user/Desktop/xxx'
-    result = cut_extension(pathA)
+    result = cutExtension(pathA)
     #result = 'C:/Users/user/Desktop/xxx'
 
     #3
     pathA = 'C:/Users/user/Desktop/xxx/'
-    result = cut_extension(pathA)
+    result = cutExtension(pathA)
     #result = 'C:/Users/user/Desktop/xxx/'
 
     #######使用相对路径#######
     #1
     pathA = './user/Desktop/xxx.txt'
-    result = cut_extension(pathA)
+    result = cutExtension(pathA)
     #result = './user/Desktop/xxx'
 
     #2
     pathA = './user/Desktop/xxx'
-    result = cut_extension(pathA)
+    result = cutExtension(pathA)
     #result = './user/Desktop/xxx'
 
     #3
     pathA = './user/Desktop/xxx/'
-    result = cut_extension(pathA)
+    result = cutExtension(pathA)
     #result = './user/Desktop/xxx/'
     ```
     """
@@ -406,7 +409,7 @@ def Extension(path):
 @path_normal
 def Dir(path):
     """
-    从路径中获取目录
+    从路径中获取上级目录
 
     不对路径进行检查，直接获取
 
@@ -490,7 +493,7 @@ def PySpace(path):
     result PySpace(pathA)
     #result = 'aaa.bb.cc'
     """
-    temp = cut_extension(path)
+    temp = cutExtension(path)
     #替换路径分隔符 TODO
     space = temp.replace(PATH_SEQ, '.')
     #如果路径是：’./a/b‘的形式，将第一个[.]和[/]或[\]去掉
@@ -537,6 +540,60 @@ def Basename(path):
 
     # return path.split(PATH_SEQ)[-1]
     return os.path.basename(path)
+
+@path_normal
+def DirAndBasename(path):
+    """
+    将路径分割为上级目录和最后一级目录/文件名
+
+    :Args:
+    - path 路径
+
+    :Returns:
+    - dir 上级目录
+    - basename 最后一级目录 或 文件名
+
+    :Usage:
+    ```python
+    ######绝对路径#######
+    #1 文件名
+    pathA = 'C:/Users/user/Desktop/xxx.txt'
+    result = DirAndBasename(pathA)
+    #result = ('C:/Users/user/Desktop', 'xxx.txt')
+
+    #2 目录名
+    pathA = 'C:/Users/user/Desktop/xxx'
+    result = DirAndBasename(pathA)
+    #result = ('C:/Users/user/Desktop', 'xxx')
+
+    #3 特殊情况
+    pathA = 'C:/Users/user/Desktop/xxx/'
+    result = DirAndBasename(pathA)
+    #result = ('C:/Users/user/Desktop', '')
+
+    ######相对路径##########
+    #1 文件名
+    pathA = './user/Desktop/xxx.txt'
+    result = DirAndBasename(pathA)
+    #result = ('./user/Desktop', 'xxx.txt')
+
+    #2 目录名
+    pathA = './user/Desktop/xxx'
+    result = DirAndBasename(pathA)
+    #result = ('./user/Desktop', 'xxx')
+
+    #3 特殊情况
+    pathA = './user/Desktop/xxx/'
+    result = DirAndBasename(pathA)
+    #result = ('./user/Desktop', '')
+
+    #4 特殊情况
+    pathA = './xxx'
+    result = DirAndBasename(pathA)
+    #result = ('.', 'xxx')
+    ```
+    """
+    return os.path.split(path)
 
 @path_normal
 def Simplename(path):
@@ -589,7 +646,7 @@ def NameAndExtension(path):
     return Simplename(path), Extension(path)
 
 @path_normal
-def BasenameFromDir(d, extension=None):
+def BasenamesFromDir(d, extension=None):
     """
     从指定目录下获取文件名（不搜索子目录）。
     
@@ -612,7 +669,7 @@ def BasenameFromDir(d, extension=None):
         
 
 @path_normal
-# walkdir_get_file_path
+# walkdir_get_file_path #TODO
 def file_of_dir(dir, extension=None):
     """
     获取目录下的所有文件路径
@@ -644,7 +701,7 @@ def file_of_dir(dir, extension=None):
     return file_paths
 
 @path_normal
-def search_file(dir, fname, extension=None, level='a', all_walk=False):
+def searchFile(dir, fname, extension=None, level='a', all_walk=False):
     """
     从目录下的各子目录中检索文件，并返回文件的路径
 
